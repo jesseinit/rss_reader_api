@@ -10,7 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
+import dj_database_url
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "userservice.apps.UserserviceConfig",
+    "feedservice.apps.FeedserviceConfig",
 ]
 
 MIDDLEWARE = [
@@ -76,12 +80,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+DATABASE_URL = config(
+    "DATABASE_URL",
+    default="postgresql://postgres:postgres@localhost:5433/rss_db",
+)
+# set db connection requests to 600 seconds to enable persistent connections
+DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=0)}
 
 
 # Password validation
@@ -136,3 +140,6 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
 }
+
+
+SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME": timedelta(minutes=5000), "REFRESH_TOKEN_LIFETIME": timedelta(days=1)}

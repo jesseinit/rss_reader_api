@@ -6,6 +6,7 @@ from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from userservice.models import User
+import feedparser
 
 
 class ResponseManager:
@@ -17,8 +18,8 @@ class ResponseManager:
         status: int = 200,
     ) -> Response:
         if error:
-            return Response({"msg": message, "data": None, "error": error}, status=status)
-        return Response({"msg": message, "data": data, "error": None}, status=status)
+            return Response({"message": message, "data": None, "error": error}, status=status)
+        return Response({"message": message, "data": data, "error": None}, status=status)
 
 
 class CustomAPIException(APIException):
@@ -30,11 +31,11 @@ class CustomAPIException(APIException):
     def __init__(self, detail: Union[List, Dict, str], status_code: int) -> None:
         self.status_code = status_code if status_code else self.status_code
         message = detail if detail is not None else self.default_message
-        self.detail = {"msg": force_str(message), "data": None, "error": None}
+        self.detail = {"message": force_str(message)}
 
 
 class TokenManager:
-    """Utility class that abstracts interation with the caching engine"""
+    """Utility class that abstracts interation with the token generation"""
 
     @classmethod
     def prepare_user_token(cls, user: Type[User]) -> Dict:
@@ -43,3 +44,14 @@ class TokenManager:
             "user": user.id,
             "token": {"refresh": str(token), "access": str(token.access_token)},
         }
+
+
+class FeedManager:
+    """Utility class that abstracts interation with the caching engine"""
+
+    @classmethod
+    def parse_feed_url(cls, url: str) -> Dict:
+        feed_data = feedparser.parse(url)
+        if feed_data.bozo is not False:
+            raise CustomAPIException("Error parsing the provided feed url")
+        return feed_data
