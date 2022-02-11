@@ -5,8 +5,8 @@ from rest_framework import status
 from userservice.models import User
 from utils.helpers import CustomAPIException, FeedManager
 
-from feedservice.models import Feed, FeedItems
-from feedservice.serializers import FeedDetailsSerializer, FeedItemsSerializer
+from feedservice.models import Feed, FeedItems, ReadUnreadFeedItems
+from feedservice.serializers import FeedDetailsSerializer, FeedItemsSerializer, ReadItemsSerializer
 
 
 class FeedService:
@@ -55,3 +55,30 @@ class FeedService:
     def fetch_registered_feeds(creator: Type[User] = None) -> Dict:
         feed_instance = Feed.objects.filter(registered_by=creator)
         return FeedDetailsSerializer(instance=feed_instance, many=True).data
+
+    def mark_read_unread(feed_item_id: int, creator: Type[User] = None) -> Dict:
+        """Handles processing of read state for a feed item"""
+        feed_item_instance = FeedItems.objects.select_related("feed").filter(id=feed_item_id).first()
+        if feed_item_instance is None:
+            raise CustomAPIException(
+                "Cannot read item. Feed item not found",
+                status.HTTP_404_NOT_FOUND,
+            )
+
+        read_unread_feed_item = ReadUnreadFeedItems.objects.filter(feed_item=feed_item_instance, user=creator).first()
+        if read_unread_feed_item is None:
+            # Item has not been read, so create and set as read
+            read_unread_feed_item = ReadUnreadFeedItems.objects.create(
+                feed_item=feed_item_instance, feed_id=feed_item_instance.feed.id, user=creator, is_read=True
+            )
+            return ReadItemsSerializer(instance=read_unread_feed_item).data
+
+        # Item has not been read, so create and set as read
+        if read_unread_feed_item.is_read is True:
+            read_unread_feed_item.is_read = False
+        else:
+            read_unread_feed_item.is_read = True
+
+        read_unread_feed_item.save(update_fields=["is_read"])
+
+        return ReadItemsSerializer(instance=read_unread_feed_item).data

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from feedservice.models import Feed, FeedItems
+from feedservice.models import Feed, FeedItems, ReadUnreadFeedItems
 
 
 class FeedInputSerializer(serializers.Serializer):
@@ -16,4 +16,10 @@ class FeedDetailsSerializer(serializers.ModelSerializer):
 class FeedItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeedItems
+        fields = "__all__"
+
+
+class ReadItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReadUnreadFeedItems
         fields = "__all__"
