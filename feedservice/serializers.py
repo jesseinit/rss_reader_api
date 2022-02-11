@@ -7,10 +7,18 @@ class FeedInputSerializer(serializers.Serializer):
     url = serializers.URLField()
 
 
+class FeedFollowUnfollowInputSerializer(serializers.Serializer):
+    feed_ids = serializers.ListField(child=serializers.IntegerField())
+    action = serializers.ChoiceField(choices=["follow", "unfollow"])
+
+    def validate_feed_ids(self, feed_ids):
+        return list(set(feed_ids))
+
+
 class FeedDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feed
-        fields = ("id", "title", "url", "registered_by", "created_at", "updated_at")
+        fields = "__all__"
 
 
 class FeedItemsSerializer(serializers.ModelSerializer):

@@ -1,4 +1,4 @@
-from typing import Dict, Type
+from typing import Dict, List, Literal, Type
 
 from django.contrib.auth.hashers import check_password
 from rest_framework import status
@@ -42,13 +42,18 @@ class FeedService:
         feed_item_qs = FeedItems.objects.filter(feed_id=feed_instance.id)
         return FeedItemsSerializer(instance=feed_item_qs, many=True).data
 
-    def retrieve_feed_items(creator: Type[User] = None) -> Dict:
-        feed_instance = Feed.objects.filter(registered_by=creator)
+    def retrieve_feed_items(feed_id: int = None, creator: Type[User] = None) -> Dict:
+        if creator and not feed_id:
+            feed_instance = Feed.objects.filter(registered_by=creator)
+        if feed_id and not creator:
+            feed_instance = Feed.objects.filter(id=feed_id)
+
         if feed_instance is None:
             raise CustomAPIException(
                 "Feed not found",
                 status.HTTP_404_NOT_FOUND,
             )
+
         feed_item_qs = FeedItems.objects.filter(feed__in=feed_instance)
         return FeedItemsSerializer(instance=feed_item_qs, many=True).data
 
@@ -61,7 +66,7 @@ class FeedService:
         feed_item_instance = FeedItems.objects.select_related("feed").filter(id=feed_item_id).first()
         if feed_item_instance is None:
             raise CustomAPIException(
-                "Cannot read item. Feed item not found",
+                "Feed item not found",
                 status.HTTP_404_NOT_FOUND,
             )
 
@@ -82,3 +87,32 @@ class FeedService:
         read_unread_feed_item.save(update_fields=["is_read"])
 
         return ReadItemsSerializer(instance=read_unread_feed_item).data
+
+    def follow_unfollow_feed(
+        feed_ids: List[int], action: Literal["follow", "unfollow"] = None, creator: Type[User] = None
+    ) -> Dict:
+        """Handles following and unfollowing of a feed item"""
+        feed_instances = Feed.objects.filter(id__in=feed_ids)
+        if not len(feed_instances):
+            raise CustomAPIException(
+                "Feeds not found",
+                status.HTTP_404_NOT_FOUND,
+            )
+
+        user = User.objects.prefetch_related("my_feeds").get(id=creator.id)
+        user_feed_ids = list(user.my_feeds.all().values_list("id", flat=True))
+
+        feed_count = 0
+        if action == "unfollow":
+            for feed in feed_instances:
+                if feed.id in user_feed_ids:
+                    feed.followers.remove(creator)
+                    feed_count += 1
+            return {"message": f"Unfollowed {feed_count} feed(s)"}
+
+        if action == "follow":
+            for feed in feed_instances:
+                if feed.id not in user_feed_ids:
+                    feed.followers.add(creator)
+                    feed_count += 1
+            return {"message": f"Followed {feed_count} feed(s)"}

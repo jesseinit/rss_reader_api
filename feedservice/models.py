@@ -7,13 +7,13 @@ class Feed(models.Model):
 
     title = models.CharField(max_length=225)
     url = models.URLField(max_length=225, unique=True)
-    registered_by = models.ForeignKey("userservice.User", related_name="my_feeds", on_delete=models.SET_NULL, null=True)
-    followers = models.ManyToManyField("userservice.User", related_name="followers")
+    registered_by = models.ForeignKey("userservice.User", on_delete=models.SET_NULL, null=True)
+    followers = models.ManyToManyField("userservice.User", related_name="my_feeds")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(default=None, null=True)
 
     def __str__(self) -> str:
-        return f"Feed<{self.rss_url}>"
+        return f"Feed<{self.title}>"
 
     class Meta:
         indexes = [

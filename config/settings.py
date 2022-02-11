@@ -143,3 +143,29 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME": timedelta(minutes=5000), "REFRESH_TOKEN_LIFETIME": timedelta(days=1)}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+        },
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": "sql.log",
+        },
+    },
+    "loggers": {
+        "django.db": {
+            "level": "DEBUG",
+            "handlers": ["file"],
+        },
+        "django.request": {
+            "level": "DEBUG",
+            "handlers": ["console"],
+        },
+    },
+}
