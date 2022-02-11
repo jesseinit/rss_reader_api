@@ -1,6 +1,7 @@
-from typing import Dict, List, Literal, Type
+from typing import Dict, List, Literal, Type, Union
 
 from django.contrib.auth.hashers import check_password
+from django.db.models import Q
 from rest_framework import status
 from userservice.models import User
 from utils.helpers import CustomAPIException, FeedManager
@@ -116,3 +117,32 @@ class FeedService:
                     feed.followers.add(creator)
                     feed_count += 1
             return {"message": f"Followed {feed_count} feed(s)"}
+
+    def retrieve_feed_all_items_with_query_filtering(
+        status: Literal["read", "unread"] = None, feed_id: Union[int, None] = None, creator: Type[User] = None
+    ) -> Dict:
+        """Handles the querying of a user's read or unread feed items"""
+
+        feed_item_qs = ReadUnreadFeedItems.objects.filter(user=creator, is_read=True)
+
+        if feed_id:
+            feed_instance = Feed.objects.filter(id=feed_id).exists()
+            if feed_instance is False:
+                raise CustomAPIException(
+                    "Feed not found",
+                    404,
+                )
+
+            feed_item_qs = feed_item_qs.filter(feed_id=feed_id)
+
+        # Unread - Get the feed_item_ids from ReadUnreadFeedItems that he has read then exlude these when querying FeedItems to get what he needs to read
+        # Read - Get the ids he has read then fetch only those
+
+        if status == "read":
+            final_qs = FeedItems.objects.filter(id__in=feed_item_qs.values_list("feed_item_id", flat=True))
+        if status == "unread":
+            final_qs = FeedItems.objects.filter(
+                ~Q(id__in=feed_item_qs.values_list("feed_item_id", flat=True)), (Q(feed_id=feed_id) if feed_id else Q())
+            )
+        print(final_qs.explain())
+        return FeedItemsSerializer(instance=final_qs.order_by("-updated_at"), many=True).data

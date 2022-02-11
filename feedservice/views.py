@@ -25,7 +25,7 @@ class FeedViewset(viewsets.ViewSet):
         )
 
     def list(self, request, *args, **kwargs):
-        """Fetch User Feeds"""
+        """Fetch all User Feeds"""
         service_response = services.FeedService.fetch_registered_feeds(creator=request.user)
         return helpers.ResponseManager.handle_response(
             message="Feed Retrieved", data=service_response, status=status.HTTP_200_OK
@@ -35,6 +35,26 @@ class FeedViewset(viewsets.ViewSet):
     def retrieve_a_feed_items(self, request, *args, **kwargs):
         """Fetch A Feed's Items"""
         service_response = services.FeedService.retrieve_feed_items(feed_id=int(kwargs["feed_id"]))
+        return helpers.ResponseManager.handle_response(
+            message="Feed Items Retrieved", data=service_response, status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=["get"], url_path="items")
+    def retrieve_all_feed_items(self, request, *args, **kwargs):
+        """Fetch All Feed Items"""
+        serialized_data = serializers.ReadUnreadQueryInputSerializer(data=request.query_params)
+        if not serialized_data.is_valid():
+            return helpers.ResponseManager.handle_response(
+                message="Something wrong with the data that has been provided",
+                error=serialized_data.errors,
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        service_response = services.FeedService.retrieve_feed_all_items_with_query_filtering(
+            feed_id=serialized_data.data.get("feed_id"),
+            status=serialized_data.data.get("status"),
+            creator=request.user,
+        )
         return helpers.ResponseManager.handle_response(
             message="Feed Items Retrieved", data=service_response, status=status.HTTP_200_OK
         )
@@ -49,7 +69,7 @@ class FeedViewset(viewsets.ViewSet):
 
     @action(detail=False, methods=["patch"], url_path="item/(?P<feed_item_id>[0-9]+)/read-unread")
     def handle_feed_read_state(self, request, *args, **kwargs):
-        """Hanles Feed Reading"""
+        """Handles Feed Reading"""
         service_response = services.FeedService.mark_read_unread(
             feed_item_id=kwargs.get("feed_item_id"), creator=request.user
         )
@@ -59,7 +79,7 @@ class FeedViewset(viewsets.ViewSet):
 
     @action(detail=False, methods=["patch"], url_path="follow-unfollow")
     def handle_feed_follow_state(self, request, *args, **kwargs):
-        """Hanles Feed Following/Unfollowing"""
+        """Handles Feed Following/Unfollowing"""
 
         serialized_data = serializers.FeedFollowUnfollowInputSerializer(data=request.data)
         if not serialized_data.is_valid():
