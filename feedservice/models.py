@@ -15,6 +15,15 @@ class Feed(models.Model):
     def __str__(self) -> str:
         return f"Feed<{self.rss_url}>"
 
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=[
+                    "url",
+                ]
+            )
+        ]
+
 
 class FeedItems(models.Model):
     """Feed Model"""
@@ -25,6 +34,9 @@ class FeedItems(models.Model):
     feed = models.ForeignKey(Feed, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(default=None, null=True)
+
+    class Meta:
+        ordering = ["-created_at"]
 
     def __str__(self):
         return f"ID:{self.id} title: {self.title}"

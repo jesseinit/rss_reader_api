@@ -2,7 +2,7 @@ COMPOSE = docker compose
 SERVICE = web
 
 start:
-	python manage.py runserver
+	python manage.py runserver 8005
 
 build:
 	$(COMPOSE) build

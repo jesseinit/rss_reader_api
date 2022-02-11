@@ -24,9 +24,18 @@ class FeedViewset(viewsets.ViewSet):
             message="Feed Added", data=service_response, status=status.HTTP_201_CREATED
         )
 
-    def retrieve(self, request, *args, **kwargs):
-        """Get a Feed Resouce"""
-        service_response = services.FeedService.retrieve_feed(feed_id=kwargs.get("pk"), creator=request.user)
+    def list(self, request, *args, **kwargs):
+        """Fetch User Feeds"""
+        service_response = services.FeedService.fetch_registered_feeds(creator=request.user)
         return helpers.ResponseManager.handle_response(
             message="Feed Retrieved", data=service_response, status=status.HTTP_200_OK
+        )
+
+    # @action(detail=False, methods=["get"], url_path="(?P<feed_id>[a-z,A-Z,0-9]+)/my-feed-items")
+    @action(detail=False, methods=["get"], url_path="my-feed-items")
+    def retrieve_feed_items(self, request, *args, **kwargs):
+        """Fetch User Feed Items"""
+        service_response = services.FeedService.retrieve_feed_items(creator=request.user)
+        return helpers.ResponseManager.handle_response(
+            message="Feed Items Retrieved", data=service_response, status=status.HTTP_200_OK
         )

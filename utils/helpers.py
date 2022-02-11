@@ -53,5 +53,5 @@ class FeedManager:
     def parse_feed_url(cls, url: str) -> Dict:
         feed_data = feedparser.parse(url)
         if feed_data.bozo is not False:
-            raise CustomAPIException("Error parsing the provided feed url")
+            raise CustomAPIException("Error parsing the provided feed url", status_code=feed_data.status)
         return feed_data
