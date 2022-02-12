@@ -8,14 +8,16 @@ from userservice.models import User
 
 
 class OnboardingService:
-    def register(username: str = None, password: str = None) -> Dict:
+    def register(username: str = None, email: str = None, password: str = None) -> Dict:
         """Service method that handles creating a user account"""
 
         # Get or create user
-        created_user = User.objects.create_user(username=username, password=password)
+        created_user = User.objects.create_user(username=username, password=password, email=email)
 
         return {
             "id": created_user.id,
+            "email": created_user.email,
+            "username": created_user.username,
         }
 
     def login(username: str = None, password: str = None) -> Dict:

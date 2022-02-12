@@ -5,3 +5,6 @@ psycopg2-binary==2.8.6
 black==22.1.0
 djangorestframework-simplejwt==5.0.0
 dj-database-url==0.5.0
+celery==5.2.3
+django-redis==5.2.0
+celery-redbeat==2.0.0

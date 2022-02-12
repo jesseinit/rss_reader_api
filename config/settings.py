@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from datetime import timedelta
 from pathlib import Path
+
 import dj_database_url
 from decouple import config
 
@@ -23,12 +24,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-*qycvxvoq2obnvotuj_@=bpto&@ma9ec5g-u)kl!l66)7iso1&"
+SECRET_KEY = config("SECRET_KEY", default="8*na@u$t-m*0agt!jk=m&x@3q827ha*_8p)m!&jhi_er90zt")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", cast=bool, default=True) is True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS",
+    cast=lambda allowed_hosts: [host.strip() for host in allowed_hosts.split(",")],
+    default="127.0.0.1,localhost",
+)
+
 APPEND_SLASH = False
 
 
@@ -139,10 +145,49 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
+    "PAGE_SIZE": 20,
+    "DEFAULT_PAGINATION_CLASS": "utils.helpers.CustomPagination",
 }
 
 
 SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME": timedelta(minutes=5000), "REFRESH_TOKEN_LIFETIME": timedelta(days=1)}
+
+REDIS_CONNECTION_URL = config("REDIS_URL", default="redis://localhost:6379/1")
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_CONNECTION_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
+
+
+# Celery Config
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BROKER_URL = CELERY_RESULT_BACKEND = CELERY_REDIS_SCHEDULER_URL = REDIS_CONNECTION_URL
+CELERY_REDIS_SCHEDULER_KEY_PREFIX = "tasks:meta:"
+CELERY_BEAT_SCHEDULER = "redbeat.RedBeatScheduler"
+CELERY_BEAT_MAX_LOOP_INTERVAL = 2
+CELERY_MAX_RETRY = config("CELERY_MAX_RETRY", default=3)
+CELERY_RETRY_DELAY = config("CELERY_RETRY_DELAY", default=5)
+CELERY_ALWAYS_EAGER = config("CELERY_ALWAYS_EAGER", default=False)
+
+
+# SMTP Configs
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = config("EMAIL_HOST", default="smtp.ethereal.email")
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+EMAIL_PORT = config("EMAIL_PORT", default=587)
+EMAIL_FROM = config("EMAIL_FROM", default="")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True)
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=False)
+
 
 LOGGING = {
     "version": 1,

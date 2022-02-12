@@ -33,10 +33,11 @@ class FeedItems(models.Model):
     summary = models.TextField()
     feed = models.ForeignKey(Feed, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(default=None, null=True)
+    published_at = models.DateTimeField(default=None, null=True)
+    entry_id = models.CharField(max_length=225, default=None, null=True)
 
     class Meta:
-        ordering = ["-created_at"]
+        ordering = ["published_at"]
 
     def __str__(self):
         return f"ID:{self.id} title: {self.title}"
