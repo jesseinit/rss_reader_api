@@ -17,7 +17,10 @@ from userservice.models import User
 
 
 class CustomPagination(pagination.PageNumberPagination):
+    """Custom Pagination Class"""
+
     def get_paginated_response(self, data):
+        """Helper method the returns a response with pagination data"""
         return Response(
             {
                 "count": self.page.paginator.count,
@@ -36,6 +39,7 @@ class ResponseManager:
         error: Union[Dict, List] = None,
         status: int = 200,
     ) -> Response:
+        """Helper method to generate response object"""
         if error:
             return Response({"error": error}, status=status)
         return Response({"data": data}, status=status)
@@ -58,6 +62,7 @@ class TokenManager:
 
     @classmethod
     def prepare_user_token(cls, user: Type[User]) -> Dict:
+        """Helper method to generate user token"""
         token = RefreshToken.for_user(user)
         return {
             "user": user.id,

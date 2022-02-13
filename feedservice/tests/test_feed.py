@@ -1,4 +1,5 @@
 import pytest
+from conftest import DotDict
 from feedservice.tests.factories import FeedFactory
 from rest_framework import status
 
@@ -16,6 +17,25 @@ class TestFeed:
 
         status_codes = [res.status_code for res in responses]
         assert all(code == status.HTTP_401_UNAUTHORIZED for code in status_codes)
+
+    def test_add_feed_url_with_bad_inputs(self, client, user_one_token):
+        """Test for adding a feed url with unprocessible input inputs"""
+        response = client.post("/api/v1/feed", {"url": "nunl/rss/Algemeen"}, **user_one_token)
+        response_data = response.json()
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response_data["error"]["url"][0] == "Enter a valid URL."
+
+    def test_add_feed_url_with_invalid_url(self, client, mocker, user_one, user_one_token, feed_response):
+        """Test for errors when adding a feed url that is not valid"""
+
+        mocker.patch("utils.helpers.feedparser.parse", return_value=DotDict({"bozo": True}))
+
+        response = client.post("/api/v1/feed", {"url": "http://www.nu.nl/rss/Algemeen"}, **user_one_token)
+
+        response_data = response.json()
+        assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
+        assert response_data["message"] == "Error parsing the provided feed url"
 
     def test_add_feed_url_success(self, client, mocker, user_one, user_one_token, feed_response):
         """Test for adding a feed url by authenticated users"""

@@ -19,10 +19,11 @@ class FeedInputSerializer(serializers.Serializer):
 
 
 class FeedFollowUnfollowInputSerializer(serializers.Serializer):
-    feed_ids = serializers.ListField(child=serializers.IntegerField())
+    feed_ids = serializers.ListField(child=serializers.IntegerField(), min_length=1)
     action = serializers.ChoiceField(choices=["follow", "unfollow"])
 
     def validate_feed_ids(self, feed_ids):
+
         return list(set(feed_ids))
 
 

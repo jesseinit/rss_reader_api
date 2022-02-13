@@ -198,7 +198,6 @@ EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=False)
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {"api_key": {"type": "apiKey", "name": "authorization", "in": "header"}},
     "USE_SESSION_AUTH": False,
-    "DOC_EXPANSION": "full",
 }
 
 USE_X_FORWARDED_HOST = True
