@@ -1,0 +1,20 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+ build:
+   runs-on: ubuntu-latest
+   steps:
+     - uses: actions/checkout@v2
+
+     - name: Deploy Docker Container to Heroku
+       uses: gonuit/heroku-docker-deploy@v1.3.3
+       with:
+         heroku_api_key: ${{ secrets.HEROKU_KEY }}
+         heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+         email: ${{ secrets.HEROKU_EMAIL }} 
+         dockerfile_directory: ./

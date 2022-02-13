@@ -1,4 +1,3 @@
-from tkinter import E
 from typing import Dict, List, Literal, Type, Union
 
 from django.db import transaction

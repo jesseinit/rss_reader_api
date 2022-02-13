@@ -1,5 +1,7 @@
+import utils.docs_spec as schema_spec
 import utils.helpers as helpers
-from rest_framework import pagination, status, viewsets
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 
 import feedservice.serializers as serializers
@@ -11,6 +13,12 @@ class FeedViewset(viewsets.ViewSet):
 
     pagination_class = helpers.CustomPagination()
 
+    @swagger_auto_schema(
+        operation_summary="Register A Feed Resouce",
+        tags=["Feed"],
+        request_body=serializers.FeedInputSerializer,
+        responses=schema_spec.ONBOARDING_REGISTER_RESPONSES,
+    )
     def create(self, request):
         """Register A Feed Resouce"""
 

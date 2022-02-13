@@ -1,16 +1,5 @@
 from drf_yasg import openapi
 
-{
-    "application/json": {
-        "error": {
-            "username": ["This field may not be blank."],
-            "password": ["This field may not be blank."],
-            "email": ["This field may not be blank."],
-        }
-    }
-}
-
-
 ONBOARDING_REGISTER_RESPONSES = {
     200: openapi.Response(
         description="Registration Success",

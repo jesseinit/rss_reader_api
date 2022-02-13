@@ -4,3 +4,5 @@ db.sqlite3
 todo.log
 .env
 sql.log
+static
+.vscode
