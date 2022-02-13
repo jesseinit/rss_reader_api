@@ -190,32 +190,6 @@ EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True)
 EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=False)
 
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-        },
-        "file": {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "filename": "sql.log",
-        },
-    },
-    "loggers": {
-        "django.db": {
-            "level": "INFO",
-            "handlers": ["file"],
-        },
-        "django.request": {
-            "level": "DEBUG",
-            "handlers": ["console"],
-        },
-    },
-}
-
 # Swagger Docs Config
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {"api_key": {"type": "apiKey", "name": "authorization", "in": "header"}},
