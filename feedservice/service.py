@@ -19,18 +19,18 @@ class FeedService:
     @transaction.atomic
     def add_feed(url: str, creator: Type[User]) -> Dict:
         """Service method that handles feed creation"""
-
         feed_instance = Feed.objects.filter(url=url).first()
         if feed_instance:
             feed_instance.followers.add(creator)
             return FeedDetailsSerializer(instance=feed_instance).data
 
         feed_data = FeedManager.parse_feed_url(url)
+
         feed_instance = Feed.objects.create(
             title=feed_data.feed.title,
             url=url,
             registered_by=creator,
-            updated_at=FeedManager.parse_feed_time(feed_data.feed.updated_parsed),
+            updated_at=FeedManager.parse_feed_time(feed_data.feed.updated),
         )
 
         # Automatically follow every feed that you create
@@ -133,7 +133,7 @@ class FeedService:
 
             feed_item_qs = feed_item_qs.filter(feed_id=feed_id)
 
-        # Unread - Get the feed_item_ids from ReadUnreadFeedItems that he has read then exlude these when querying FeedItems to get what he needs to read
+        # Unread - Get the feed_item that are not in ReadUnreadFeedItems from FeedItems for a specific feed
         # Read - Get the ids he has read then fetch only those
 
         if status == "read":
@@ -152,10 +152,10 @@ class FeedService:
         feed = Feed.objects.filter(id=feed_id).first()
         if feed is None:
             raise CustomAPIException("Feed not found", status_code=status.HTTP_404_NOT_FOUND)
-        try:
-            return Tasks.update_feed_and_items(feed_id=feed_id)
-        except:
-            return "Feed has failed, Try again later"
+
+        Tasks.update_feed_and_items.delay(feed_id=feed_id)
+
+        return "Feed update has been triggered triggered. Timeline would be updated shortly"
 
     def create_feed_items_from_entries(entries: List[FeedParserDict], feed_id: int) -> List[Type[FeedItems]]:
         """Create feeditems from parsed feed entries"""
@@ -165,7 +165,7 @@ class FeedService:
                 link=item_data.link,
                 summary=item_data.summary,
                 feed_id=feed_id,
-                published_at=FeedManager.parse_feed_time(item_data.published_parsed),
+                published_at=FeedManager.parse_feed_time(item_data.published),
                 entry_id=item_data.id,
             )
             for item_data in entries

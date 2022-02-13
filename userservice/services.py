@@ -28,14 +28,14 @@ class OnboardingService:
         if user is None:
             raise CustomAPIException(
                 "Your login credentials are not correct",
-                status.HTTP_401_UNAUTHORIZED,
+                status.HTTP_400_BAD_REQUEST,
             )
 
         is_valid_password = check_password(password, user.password)
         if not is_valid_password:
             raise CustomAPIException(
                 "Your login credentials are not correct",
-                status.HTTP_401_UNAUTHORIZED,
+                status.HTTP_400_BAD_REQUEST,
             )
 
         return TokenManager.prepare_user_token(user)

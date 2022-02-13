@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "drf_yasg",
     "rest_framework",
     "userservice.apps.UserserviceConfig",
     "feedservice.apps.FeedserviceConfig",
@@ -175,7 +176,7 @@ CELERY_BEAT_SCHEDULER = "redbeat.RedBeatScheduler"
 CELERY_BEAT_MAX_LOOP_INTERVAL = 2
 CELERY_MAX_RETRY = config("CELERY_MAX_RETRY", default=3)
 CELERY_RETRY_DELAY = config("CELERY_RETRY_DELAY", default=5)
-CELERY_ALWAYS_EAGER = config("CELERY_ALWAYS_EAGER", default=False)
+CELERY_ALWAYS_EAGER = config("CELERY_ALWAYS_EAGER", cast=bool, default=False)
 
 
 # SMTP Configs
@@ -205,7 +206,7 @@ LOGGING = {
     },
     "loggers": {
         "django.db": {
-            "level": "DEBUG",
+            "level": "INFO",
             "handlers": ["file"],
         },
         "django.request": {
@@ -213,4 +214,11 @@ LOGGING = {
             "handlers": ["console"],
         },
     },
+}
+
+# Swagger Docs Config
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {"api_key": {"type": "apiKey", "name": "authorization", "in": "header"}},
+    "USE_SESSION_AUTH": False,
+    "DOC_EXPANSION": "full",
 }

@@ -1,6 +1,7 @@
 import time
 from datetime import datetime as dt
 from datetime import timezone
+from email.utils import parsedate_to_datetime
 from typing import Dict, List, Type, Union
 
 import feedparser
@@ -78,17 +79,9 @@ class FeedManager:
         return feed_data
 
     @classmethod
-    def parse_feed_time(cls, feed_time: Type[time.struct_time], tz: Type[timezone] = timezone.utc) -> Type[dt]:
+    def parse_feed_time(cls, feed_time: str, tz: Type[timezone] = timezone.utc) -> Type[dt]:
         """Utility method to parse feed or item time to datetime object"""
-        return dt(
-            feed_time.tm_year,
-            feed_time.tm_mon,
-            feed_time.tm_mday,
-            feed_time.tm_hour,
-            feed_time.tm_min,
-            feed_time.tm_sec,
-            tzinfo=tz,
-        )
+        return parsedate_to_datetime(feed_time)
 
 
 class EmailManager:
@@ -107,7 +100,7 @@ class EmailManager:
             subject=self.subject,
             body=self.body,
             from_email=self.from_email,
-            to=self.to_email,
+            bcc=self.to_email,
         )
         message.content_subtype = "html"
         return message

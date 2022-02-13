@@ -20,7 +20,7 @@ class TestRegistration:
         assert res["data"]["username"] == payload["username"]
         assert res["data"]["email"] == payload["email"]
 
-    def test_signup_with_bad_inputs(self, client, registered_user):
+    def test_signup_with_bad_inputs(self, client):
         """
         Test for errors when a user attempts to signup with unprocessible inputs
         """
@@ -37,7 +37,7 @@ class TestRegistration:
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert response_data == expected_response
 
-    def test_signup_with_exisiting_inputs(self, client, registered_user):
+    def test_signup_with_exisiting_inputs(self, client, user_one):
         """
         Test for errors when a user attempts to signup with existing inputs
         """

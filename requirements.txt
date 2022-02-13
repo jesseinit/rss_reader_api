@@ -11,3 +11,6 @@ celery-redbeat==2.0.0
 pytest-django==4.5.2
 factory_boy==3.2.1
 pytest-factoryboy==2.1.0
+pytest-env==0.6.2
+pytest-celery==0.0.0
+drf-yasg==1.20.0
