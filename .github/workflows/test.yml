@@ -12,6 +12,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rss_db
       REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: some-random-key
     services:
       # Label used to access the service container
       postgres:

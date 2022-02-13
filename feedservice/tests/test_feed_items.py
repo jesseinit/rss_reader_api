@@ -151,11 +151,18 @@ class TestFeedItems:
         total_count = 50
         feed_item_ids = [FeedItemsFactory(feed=feed).id for _ in range(total_count)]
 
-        response = client.patch(
-            f"/api/v1/feed/item/{random.choices(feed_item_ids)[0]}/read-unread", {}, **user_two_token
-        )
+        # Reading the Item
+        response = client.patch(f"/api/v1/feed/item/{feed_item_ids[0]}/read-unread", {}, **user_two_token)
 
         response_data = response.json()
 
         assert response.status_code == status.HTTP_200_OK
         assert response_data["data"]["is_read"] is True
+
+        # Unreading the Item
+        response = client.patch(f"/api/v1/feed/item/{feed_item_ids[0]}/read-unread", {}, **user_two_token)
+
+        response_data = response.json()
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response_data["data"]["is_read"] is False
