@@ -41,5 +41,5 @@ class TestLogin:
         expected_response = {"message": "Your login credentials are not correct"}
         response = client.post("/api/v1/auth/login", input_payload)
         response_data = response.json()
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response_data == expected_response

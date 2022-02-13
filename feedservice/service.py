@@ -9,6 +9,7 @@ from rest_framework import status
 from userservice.models import User
 from utils.helpers import CustomAPIException, FeedManager
 
+import feedservice.tasks as Tasks
 from feedservice.models import Feed, FeedItems, ReadUnreadFeedItems
 from feedservice.serializers import FeedDetailsSerializer, ReadItemsSerializer
 
@@ -58,7 +59,7 @@ class FeedService:
 
     def fetch_registered_feeds(creator: Type[User] = None) -> Dict:
         """Retrieves feeds registered by the authenticated user"""
-        return Feed.objects.filter(registered_by=creator)
+        return Feed.objects.filter(registered_by=creator).order_by("updated_at")
 
     def mark_read_unread(feed_item_id: int, creator: Type[User] = None) -> Dict:
         """Handles processing of read state for a feed item"""
@@ -147,7 +148,6 @@ class FeedService:
 
     def feed_force_update(feed_id: str = None) -> str:
         """Service method that handles force updating of a feed"""
-        import feedservice.tasks as Tasks
 
         feed = Feed.objects.filter(id=feed_id).first()
         if feed is None:
@@ -155,7 +155,7 @@ class FeedService:
 
         Tasks.update_feed_and_items.delay(feed_id=feed_id)
 
-        return "Feed update has been triggered triggered. Timeline would be updated shortly"
+        return "Feed update has been triggered. Timeline would be updated shortly"
 
     def create_feed_items_from_entries(entries: List[FeedParserDict], feed_id: int) -> List[Type[FeedItems]]:
         """Create feeditems from parsed feed entries"""

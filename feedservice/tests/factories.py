@@ -1,15 +1,24 @@
-import factory
+from datetime import timezone
 
-# from django.contrib.auth.hashers import make_password
-from faker import Factory as FakerFactory
+import factory
+from userservice.tests.factories import UserFactory
 
 
 class FeedFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = "feedservice.Feed"
 
-    title = factory.Faker("sentence", sentence=10)
+    title = factory.Faker("sentence", nb_words=10)
     url = factory.Faker("url")
-    email = factory.Faker("email")
-    created_at = factory.Faker("email")
-    updated_at = factory.Faker("email")
+    registered_by = factory.SubFactory(UserFactory)
+    created_at = factory.Faker("date_time", tzinfo=timezone.utc)
+    updated_at = factory.Faker("date_time", tzinfo=timezone.utc)
+
+    @factory.post_generation
+    def followers(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for follower in extracted:
+                self.followers.add(follower)

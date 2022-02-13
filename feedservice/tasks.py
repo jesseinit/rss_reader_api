@@ -4,8 +4,8 @@ from django.utils.translation import gettext_lazy as _
 from userservice.models import User
 from utils.helpers import EmailManager, FeedManager
 
+import feedservice.service as fs
 from feedservice.models import Feed, FeedItems
-from feedservice.service import FeedService
 
 
 def notify_users(self, exc, task_id, args, kwargs, einfo):
@@ -37,6 +37,7 @@ def update_feed_and_items(self, feed_id: int = None):
     else:
         feed_qs = Feed.objects.all()
 
+    # Fetch records in an efficient and iterative manner.
     for feed in feed_qs.iterator(chunk_size=1 if not feed_id else 1000):
         feed_data = FeedManager.parse_feed_url(feed.url)
         feed_resource_last_update = FeedManager.parse_feed_time(feed_data.updated)
@@ -50,7 +51,9 @@ def update_feed_and_items(self, feed_id: int = None):
 
         all_feed_item = list(FeedItems.objects.filter(feed=feed).values("entry_id", "published_at"))
         if len(all_feed_item) < 1:
-            created_feed_items = FeedService.create_feed_items_from_entries(entries=feed_data.entries, feed_id=feed.id)
+            created_feed_items = fs.FeedService.create_feed_items_from_entries(
+                entries=feed_data.entries, feed_id=feed.id
+            )
             return _(f"Added {len(created_feed_items)} feed items.")
 
         most_recent_feed_item = all_feed_item[0]
@@ -64,6 +67,6 @@ def update_feed_and_items(self, feed_id: int = None):
             and item_data.id not in all_entry_ids
         ]
 
-        created_feed_items = FeedService.create_feed_items_from_entries(entries=filtered_entried, feed_id=feed.id)
+        created_feed_items = fs.FeedService.create_feed_items_from_entries(entries=filtered_entried, feed_id=feed.id)
 
         return _(f"Added {len(created_feed_items)} feed items.")
