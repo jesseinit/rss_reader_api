@@ -23,3 +23,6 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = "username"
 
     objects = UserManager()
+
+    def __str__(self) -> str:
+        return f"<User {self.username}>"
