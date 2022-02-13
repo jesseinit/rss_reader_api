@@ -4,8 +4,6 @@ from pytest_factoryboy import register
 from feedservice.tests.factories import FeedFactory
 from userservice.tests.factories import UserFactory
 
-register(FeedFactory, "feed")
-
 register(UserFactory, "user_one", username="jesseinit", email="john.doe@mail.com")
 register(UserFactory, "user_two", username="user_two", email="user_two@mail.com")
 
@@ -26,7 +24,10 @@ def user_one_token(user_one, client):
         "/api/v1/auth/login",
         {"username": user_one.username, "password": "K1#EzbuXsFWZ"},
     )
-    return {"HTTP_AUTHORIZATION": f"Bearer {response.json()['data']['token']['access']}"}
+    return {
+        "content_type": "application/json",
+        "HTTP_AUTHORIZATION": f"Bearer {response.json()['data']['token']['access']}",
+    }
 
 
 @pytest.fixture()
@@ -35,7 +36,10 @@ def user_two_token(user_two, client):
         "/api/v1/auth/login",
         {"username": user_two.username, "password": "K1#EzbuXsFWZ"},
     )
-    return {"HTTP_AUTHORIZATION": f"Bearer {response.json()['data']['token']['access']}"}
+    return {
+        "content_type": "application/json",
+        "HTTP_AUTHORIZATION": f"Bearer {response.json()['data']['token']['access']}",
+    }
 
 
 @pytest.fixture()

@@ -48,12 +48,6 @@ class FeedService:
         if feed_id and not creator:
             feed_instance = Feed.objects.filter(id=feed_id)
 
-        if feed_instance is None:
-            raise CustomAPIException(
-                "Feed not found",
-                status.HTTP_404_NOT_FOUND,
-            )
-
         feed_item_qs = FeedItems.objects.filter(feed__in=feed_instance)
         return feed_item_qs
 
@@ -134,7 +128,7 @@ class FeedService:
 
             feed_item_qs = feed_item_qs.filter(feed_id=feed_id)
 
-        # Unread - Get the feed_item that are not in ReadUnreadFeedItems from FeedItems for a specific feed
+        # Unread - Get the feed_items that are not in ReadUnreadFeedItems from FeedItems for a specific feed
         # Read - Get the ids he has read then fetch only those
 
         if status == "read":

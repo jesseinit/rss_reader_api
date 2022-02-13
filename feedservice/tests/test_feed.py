@@ -22,9 +22,7 @@ class TestFeed:
 
         mocker.patch("feedservice.service.FeedManager.parse_feed_url", return_value=feed_response)
 
-        response = client.post(
-            "/api/v1/feed", {"url": "http://www.nu.nl/rss/Algemeen"}, content_type="application/json", **user_one_token
-        )
+        response = client.post("/api/v1/feed", {"url": "http://www.nu.nl/rss/Algemeen"}, **user_one_token)
         response_data = response.json()
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -39,7 +37,7 @@ class TestFeed:
                 user_two,
             ),
         )
-        response = client.get("/api/v1/feed", content_type="application/json", **user_one_token)
+        response = client.get("/api/v1/feed", **user_one_token)
         response_data = response.json()
 
         assert response.status_code == status.HTTP_200_OK
@@ -51,9 +49,7 @@ class TestFeed:
         """Test that users cannot follow/unfollow non-existing feeds"""
 
         payload = {"action": "follow", "feed_ids": [20, 15, 44]}
-        response = client.patch(
-            "/api/v1/feed/follow-unfollow", payload, content_type="application/json", **user_one_token
-        )
+        response = client.patch("/api/v1/feed/follow-unfollow", payload, **user_one_token)
 
         response_data = response.json()
 
@@ -67,27 +63,21 @@ class TestFeed:
         feeds_ids = [feed.id for feed in feeds]
 
         payload = {"feed_ids": feeds_ids, "action": "unfollow"}
-        response = client.patch(
-            "/api/v1/feed/follow-unfollow", payload, content_type="application/json", **user_one_token
-        )
+        response = client.patch("/api/v1/feed/follow-unfollow", payload, **user_one_token)
         response_data = response.json()
 
         # Assert that user has NOT unfollowed feeds he is intends following
         assert response_data["data"]["message"] == "Unfollowed 0 feed(s)"
 
         payload["action"] = "follow"
-        response = client.patch(
-            "/api/v1/feed/follow-unfollow", payload, content_type="application/json", **user_one_token
-        )
+        response = client.patch("/api/v1/feed/follow-unfollow", payload, **user_one_token)
         response_data = response.json()
 
         # Assert that user HAS followed feeds he intend following
         assert response_data["data"]["message"] == f"Followed {len(payload['feed_ids'])} feed(s)"
 
         payload["action"] = "unfollow"
-        response = client.patch(
-            "/api/v1/feed/follow-unfollow", payload, content_type="application/json", **user_one_token
-        )
+        response = client.patch("/api/v1/feed/follow-unfollow", payload, **user_one_token)
         response_data = response.json()
 
         # Assert that same user HAS unfollowed feeds he WAS following
@@ -97,9 +87,7 @@ class TestFeed:
         """Test that users can force the update of a feed"""
         bg_task_mock = mocker.patch("feedservice.tasks.update_feed_and_items.delay")
 
-        response = client.patch(
-            f"/api/v1/feed/{20}/force-update", {}, content_type="application/json", **user_one_token
-        )
+        response = client.patch(f"/api/v1/feed/{20}/force-update", {}, **user_one_token)
         response_data = response.json()
 
         # Asset that non-exisiting feed cannot be force updated
@@ -108,9 +96,7 @@ class TestFeed:
         assert bg_task_mock.call_count == 0
 
         feed = FeedFactory()
-        response = client.patch(
-            f"/api/v1/feed/{feed.id}/force-update", {}, content_type="application/json", **user_one_token
-        )
+        response = client.patch(f"/api/v1/feed/{feed.id}/force-update", {}, **user_one_token)
         response_data = response.json()
 
         assert response_data["data"] == f"Feed update has been triggered. Timeline would be updated shortly"
