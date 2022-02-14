@@ -157,5 +157,6 @@ class FeedViewset(viewsets.ViewSet):
     @action(detail=False, methods=["patch"], url_path="(?P<feed_id>[0-9]+)/force-update")
     def force_update_feed(self, request, *args, **kwargs):
         """Feed Force Update"""
+
         service_response = services.FeedService.feed_force_update(feed_id=int(kwargs["feed_id"]))
         return helpers.ResponseManager.handle_response(data=service_response, status=status.HTTP_200_OK)

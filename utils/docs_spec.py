@@ -180,4 +180,9 @@ FORCE_UPDATE_RESPONSE = {
             "application/json": {"data": "Feed update has been triggered triggered. Timeline would be updated shortly"}
         },
     ),
+    400: openapi.Response(
+        description="Bad User Input",
+        examples={"application/json": {"message": "Feed not found"}},
+    ),
+    **UNAUTHENTICATED_RESPONSE,
 }

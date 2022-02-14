@@ -94,8 +94,8 @@ DATABASE_URL = config(
     "DATABASE_URL",
     default="postgresql://postgres:postgres@localhost:5433/rss_db",
 )
-# set db connection requests to 600 seconds to enable persistent connections
-DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=0)}
+
+DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
 
 
 # Password validation

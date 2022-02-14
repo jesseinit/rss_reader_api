@@ -42,6 +42,7 @@ class FeedService:
 
     def retrieve_feed_items(feed_id: int = None, creator: Type[User] = None):
         """Get feed items either by an id or those created by a user"""
+
         if creator and not feed_id:
             feed_instance = Feed.objects.filter(registered_by=creator)
         if feed_id and not creator:
@@ -56,6 +57,7 @@ class FeedService:
 
     def mark_read_unread(feed_item_id: int, creator: Type[User] = None) -> Dict:
         """Handles processing of read state for a feed item"""
+
         feed_item_instance = FeedItems.objects.select_related("feed").filter(id=feed_item_id).first()
         if feed_item_instance is None:
             raise CustomAPIException(
@@ -85,6 +87,7 @@ class FeedService:
         feed_ids: List[int], action: Literal["follow", "unfollow"] = None, creator: Type[User] = None
     ) -> Dict:
         """Handles following and unfollowing of a feed item"""
+
         feed_instances = Feed.objects.filter(id__in=feed_ids)
         if not len(feed_instances):
             raise CustomAPIException(
@@ -152,6 +155,7 @@ class FeedService:
 
     def create_feed_items_from_entries(entries: List[FeedParserDict], feed_id: int) -> List[Type[FeedItems]]:
         """Create feeditems from parsed feed entries"""
+
         feed_items = [
             FeedItems(
                 title=item_data.title,
