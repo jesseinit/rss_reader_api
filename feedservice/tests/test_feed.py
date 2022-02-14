@@ -39,7 +39,7 @@ class TestFeed:
 
     def test_add_feed_url_success(self, client, mocker, user_one, user_one_token, feed_response):
         """Test for adding a feed url by authenticated users"""
-
+        bg_task_mock = mocker.patch("feedservice.tasks.update_feed_and_items.delay")
         mocker.patch("feedservice.service.FeedManager.parse_feed_url", return_value=feed_response)
 
         response = client.post("/api/v1/feed", {"url": "http://www.nu.nl/rss/Algemeen"}, **user_one_token)
@@ -47,6 +47,7 @@ class TestFeed:
 
         assert response.status_code == status.HTTP_201_CREATED
         assert user_one.id in response_data["data"]["followers"]
+        assert bg_task_mock.call_count == 1
 
     def test_fetch_my_feeds(self, client, user_one, user_two, user_one_token):
         """Test that users can fetch their feed items and also see those following them"""
