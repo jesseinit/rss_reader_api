@@ -15,13 +15,15 @@ logging.basicConfig(level=logging.DEBUG)
 def notify_users(self, exc, task_id, args, kwargs, einfo):
     """Notify user callback function"""
 
-    user_emails = User.objects.values_list("email", flat=True)
-    mail = EmailManager(
-        email_body=_(f"The feed has failed to update"),
-        subject="Failed Feed Update",
-        to_emails=user_emails,
-    )
-    mail.send()
+    if kwargs.get("feed_id"):
+        requested_feed = Feed.objects.filter(id=kwargs.get("feed_id")).first()
+        follower_emails = list(requested_feed.followers.all().values_list("email", flat=True))
+        mail = EmailManager(
+            email_body=_(f"The feed with url {requested_feed.url} has failed to update"),
+            subject="Failed Feed Update",
+            to_emails=follower_emails,
+        )
+        mail.send()
 
 
 @shared_task(

@@ -36,9 +36,7 @@ class FeedService:
         # Automatically follow every feed that you create
         feed_instance.followers.add(creator)
 
-        # We defer feed item update to the background
-        Tasks.update_feed_and_items.delay(feed_id=feed_instance.id)
-
+        FeedService.create_feed_items_from_entries(entries=feed_data.entries, feed_id=feed_instance.id)
         return FeedDetailsSerializer(instance=feed_instance).data
 
     def retrieve_feed_items(feed_id: int = None, creator: Type[User] = None):
