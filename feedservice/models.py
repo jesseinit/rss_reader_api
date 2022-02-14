@@ -37,7 +37,7 @@ class FeedItems(models.Model):
     entry_id = models.CharField(max_length=225, default=None, null=True)
 
     class Meta:
-        ordering = ["published_at"]
+        ordering = ["-published_at"]
 
     def __str__(self):
         return f"ID:{self.id} title: {self.title}"
